@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/salihmohammed/Documents/College/Ohlone/Spring 2025/CS-102-04/Class_notes/repos/CS_102_LastOneStanding",
+      "program": "/Users/salihmohammed/Documents/College/Ohlone/Spring 2025/CS-102-04/Class_notes/repos/CS_102_LastOneStanding/build/Debug/outDebug"
+    }
+  ]
+}
