@@ -19,3 +19,4 @@ Game rule Conditions to be added
 
 [Git basics resources](https://louisanatalikaj.medium.com/git-commands-that-are-useful-in-collaborative-development-396deee22ee5)
 
+## Game conditions to win
