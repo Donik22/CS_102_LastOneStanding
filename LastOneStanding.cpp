@@ -14,25 +14,63 @@ Octavio perez
 #include <iostream>
 #include <cstdlib>
 #include <string>
-#include <tuple>
 
 using namespace std;
 
+
+
+bool turn;
 // A function that takes 3 integer inputs, Processes them and returns 3 integer outputs.
-tuple<int,int,int> gameAlgo(int a, int b, int c) {
 
-//placeholder if else sequence to test the code
-    if (a >= b && a >= c) {
-        a = max(0, a - 1);
-    } else if (b >= a && b >= c) {
-        b = max(0, b - 1);
-    } else {
-        c = max(0, c - 1);
+int gameAlgo(int a, int b, int c) {
+cout << "what are the three numbers for your game"<<endl;
+cin>> a >> b >> c;
+cout << "type true if it's your turn and false if it is not your turn"<<endl;
+cin >> turn;
+if(turn == true) 
+{
+
+    a = 0;
+
+    cout << "Integers: " << a << " " << b << " " << c << "\n" ;
+    cin>> a >> b >> c;
+    if(b <= 3 && c <=3) 
+    {
+
+        b = 1;
+        
+        cout << "New integers: " << a << " " << b << " " << c << "\n" ;
+        cin>> a >> b >> c;
+        if(b<=1 && c<= 2)
+        {
+            c = 0;
+            cout << "New integers: " << a << " " << b << " " << c << "\n" ;
+            cin>> a >> b >> c;
+            
+            
+        }
+
     }
-
-    cout << "New integers: " << a << " " << b << " " << c << "\n" ;
     
-    return make_tuple(a , b , c);
+
+}
+
+
+
+else if(turn == false)
+{
+    
+    cout << "Integers: " << a << " " << b << " " << c << "\n" ;
+    cin>> a >> b >> c;
+   
+
+}
+
+else if(cin.fail())
+{
+gameAlgo(a,b,c);
+}
+
 }
 
 // Function to sum three integers
@@ -85,4 +123,3 @@ Game rule Conditions to be added
 3) Function output cannot be negative
 4) Make sure the sume of player2 input is at least 1 number less than the prevous plater 1 output
 */
-
