@@ -1,5 +1,5 @@
 /*
-Work Group 
+Group 1
 date 02/20/2024
 List of students
 
