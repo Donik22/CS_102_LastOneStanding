@@ -1,3 +1,15 @@
+/*
+Work Group 
+date 02/20/2024
+List of students
+
+Largest Prime Group 1 Names:
+Armando rosales
+Salih Mohammed
+Neha Jindal
+Octavio perez
+
+*/
 #include <iostream>
 #include <vector>
 #include "functions/gameAlgo.h"

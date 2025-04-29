@@ -36,16 +36,132 @@ int sum(const vector<int>& numbers) {
     return total;
 }
 
+bool isWinningPosition(const vector<int>& numbers) {
+    int countOnesOrZeros = 0;
+    for (int num : numbers) {
+        if (num == 0 || num == 1) {
+            countOnesOrZeros++;
+        }
+    }
+
+    // Consider it risky if 2 or more piles are 0 or 1
+    if (countOnesOrZeros >= 2) {
+        return true;
+    }
+
+    // Fallback heuristic: avoid perfectly equal piles
+    return !(numbers[0] == numbers[1] && numbers[1] == numbers[2]);
+}
+
+vector<int> bestMoveFromCriticalNumbers(const vector<int>& numbers) {
+    vector<int> sortedNumbers = numbers;
+    vector<int> move = numbers; // default move: no change
+    sort(sortedNumbers.begin(), sortedNumbers.end());
+
+    // Define specific critical winning moves
+    if (sortedNumbers == vector<int>{0, 1, 1}) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == 1) {
+                move[i] = 0;
+                return move;
+            }
+        }
+    }
+    if (sortedNumbers == vector<int>{0, 1, 2}) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == 2) {
+                move[i] = 0;
+                return move;
+            }
+        }
+    }
+    if (sortedNumbers == vector<int>{1, 2, 3}) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == 3) {
+                move[i] = 0;
+                return move;
+            }
+        }
+    }
+    if (sortedNumbers == vector<int>{2, 3, 5}) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == 5) {
+                move[i] = 0;
+                return move;
+            }
+        }
+    }
+    if (sortedNumbers == vector<int>{3, 5, 6}) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == 6) {
+                move[i] = 2;
+                return move;
+            }
+        }
+    }
+    // If sorted numbers is 0, 1 , n>0
+    if (sortedNumbers[0] == 0 && sortedNumbers[1] == 0 && sortedNumbers[2] >= 2) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == sortedNumbers[2]) {
+                move[i] = 1;
+                return move;
+            }
+        }
+    }
+    if (sortedNumbers[0] == 0 && sortedNumbers[1] == 1 && sortedNumbers[2] > 2) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == sortedNumbers[2]) {
+                move[i] = 0;
+                return move;
+            }
+        }
+    }
+
+    if (sortedNumbers[0] == 0 && sortedNumbers[1] > 2 && sortedNumbers[2] > 2) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == sortedNumbers[2]) {
+                move[i] = 2;
+                return move;
+            }
+        }
+    }
+
+    if (sortedNumbers[0] == 0 && sortedNumbers[1] == 2 && sortedNumbers[2] == 2) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == 2) {
+                move[i] = 1;
+                return move;
+            }
+        }
+    }
+    
+    /* Example to add an additional condition
+    if (sortedNumbers[0] == 0 && sortedNumbers[1] == 1 && sortedNumbers[2] > 2) {
+        for (int i = 0; i < 3; ++i) {
+            if (numbers[i] == sortedNumbers[2]) {
+                move[i] = 1;
+                return move;
+            }
+        }
+    }
+    */
+    return {}; // No critical best move found
+}
+
 // Main bot decision-making: randomized subtraction from a random non-empty pile
 vector<int> gameAlgo(vector<int> numbers) {
-    // Seed randomness only once (ideally this should be done in main, but adding here for simplicity)
+    vector<int> criticalMove = bestMoveFromCriticalNumbers(numbers);
+    if (!criticalMove.empty()) {
+        cout << "Bot plays critical best move based on known winning positions.\n";
+        return criticalMove;
+    }
+
     static bool seeded = false;
     if (!seeded) {
         srand(time(0));
         seeded = true;
     }
 
-    // Collect indices of non-empty piles
     vector<int> nonEmptyIndices;
     for (int i = 0; i < numbers.size(); ++i) {
         if (numbers[i] > 0) {
@@ -53,16 +169,28 @@ vector<int> gameAlgo(vector<int> numbers) {
         }
     }
 
-    if (!nonEmptyIndices.empty()) {
-        int chosenIndex = nonEmptyIndices[rand() % nonEmptyIndices.size()];
-        int maxSubtract = numbers[chosenIndex];
-        int subtractAmount = (rand() % maxSubtract) + 1; // Random between 1 and current pile value
-
-        numbers[chosenIndex] -= subtractAmount;
-
-        cout << "Bot subtracts " << subtractAmount << " from pile "
-             << static_cast<char>('A' + chosenIndex) << ".\n";
+    vector<int> bestMove = numbers;
+    for (int idx : nonEmptyIndices) {
+        for (int sub = 1; sub <= numbers[idx]; ++sub) {
+            vector<int> testMove = numbers;
+            testMove[idx] -= sub;
+            if (!isWinningPosition(testMove)) {
+                bestMove = testMove;
+                cout << "Bot plays safe move: subtract " << sub << " from pile " << static_cast<char>('A' + idx) << ".\n";
+                return bestMove;
+            }
+        }
     }
+
+    // If no safe move found, fallback to random move
+    int chosenIndex = nonEmptyIndices[rand() % nonEmptyIndices.size()];
+    int maxSubtract = numbers[chosenIndex];
+    int subtractAmount = (rand() % maxSubtract) + 1;
+
+    numbers[chosenIndex] -= subtractAmount;
+
+    cout << "Bot plays risky move: subtract " << subtractAmount << " from pile "
+         << static_cast<char>('A' + chosenIndex) << ".\n";
 
     return numbers;
 }
