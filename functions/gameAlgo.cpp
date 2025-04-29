@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <cstdlib> // Add this at the top of the file if not already included
+#include <ctime>   // Add this at the top of the file if not already included
 #include "gameAlgo.h"
 
 using namespace std;
@@ -34,19 +36,34 @@ int sum(const vector<int>& numbers) {
     return total;
 }
 
-// Main bot decision-making: always subtract 1 from the largest non-empty pile
+// Main bot decision-making: randomized subtraction from a random non-empty pile
 vector<int> gameAlgo(vector<int> numbers) {
-    int largestIndex = 0;
-    for (int i = 1; i < numbers.size(); ++i) {
-        if (numbers[i] > numbers[largestIndex]) {
-            largestIndex = i;
+    // Seed randomness only once (ideally this should be done in main, but adding here for simplicity)
+    static bool seeded = false;
+    if (!seeded) {
+        srand(time(0));
+        seeded = true;
+    }
+
+    // Collect indices of non-empty piles
+    vector<int> nonEmptyIndices;
+    for (int i = 0; i < numbers.size(); ++i) {
+        if (numbers[i] > 0) {
+            nonEmptyIndices.push_back(i);
         }
     }
-    if (numbers[largestIndex] > 0) {
-        numbers[largestIndex] -= 1;
-        cout << "Bot subtracts 1 from pile "
-             << static_cast<char>('A' + largestIndex) << ".\n";
+
+    if (!nonEmptyIndices.empty()) {
+        int chosenIndex = nonEmptyIndices[rand() % nonEmptyIndices.size()];
+        int maxSubtract = numbers[chosenIndex];
+        int subtractAmount = (rand() % maxSubtract) + 1; // Random between 1 and current pile value
+
+        numbers[chosenIndex] -= subtractAmount;
+
+        cout << "Bot subtracts " << subtractAmount << " from pile "
+             << static_cast<char>('A' + chosenIndex) << ".\n";
     }
+
     return numbers;
 }
 

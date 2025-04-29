@@ -1,58 +1,83 @@
+#include <iostream>
+#include <vector>
 #include <set>
+#include <cstdlib>
+#include <ctime>
 #include "functions/dbHandler.h"
 #include "functions/gameAlgo.h"
-#include <vector>
-#include <iostream>
 
 using namespace std;
 
 sqlite3* db;
+vector<int> initialPiles; // Store starting configuration
 set<vector<int>> visitedStates;
-int gameIdCounter = 1; // Start counting games
+int gameIdCounter = 1; // Track each game separately
 
+// Simulate one full game between two bots
 void simulateGame(vector<int> piles, int moveNumber, bool isBot1Turn) {
     if (piles[0] == 0 && piles[1] == 0 && piles[2] == 0) {
-        // Game over. Save winner.
-        updateGameResult(db, gameIdCounter, isBot1Turn ? "Bot2" : "Bot1"); // Last mover loses
-        gameIdCounter++;
+        updateGameResult(db, gameIdCounter, isBot1Turn ? "Bot2" : "Bot1");
         return;
     }
 
     if (visitedStates.count(piles)) {
-        return; // Skip redundant paths
+        return;
     }
     visitedStates.insert(piles);
 
-    for (int i = 0; i < 3; ++i) {
-        if (piles[i] > 0) {
-            for (int sub = 1; sub <= piles[i]; ++sub) {
-                vector<int> newPiles = piles;
-                newPiles[i] -= sub;
+    // Bot makes a move
+    vector<int> newPiles = gameAlgo(piles);
 
-                char pileChar = 'A' + i;
-                string whoMoved = isBot1Turn ? "Bot1" : "Bot2";
+    // Insert move into database
+    insertData(db, gameIdCounter, moveNumber, piles[0], piles[1], piles[2],
+               isBot1Turn ? "Bot1" : "Bot2", '-', 0, "", "");
 
-                // Insert move into database
-                insertData(db, gameIdCounter, moveNumber, piles[0], piles[1], piles[2],
-                           whoMoved, pileChar, sub, newPiles[i], ""); // game_result blank for now
-
-                simulateGame(newPiles, moveNumber + 1, !isBot1Turn);
-            }
-        }
-    }
+    simulateGame(newPiles, moveNumber + 1, !isBot1Turn);
 }
 
 int main() {
     db = openDatabase("gameData.db");
     if (!db) {
         cerr << "Failed to open database. Exiting." << endl;
-        return -1;
+        return 1;
     }
 
     createTable(db);
 
-    vector<int> initialPiles = {3, 3, 3}; // Small for testing first
-    simulateGame(initialPiles, 1, true); // Bot1 starts
+    // Step 1: Ask for maximum pile size
+    int maxPile;
+    cout << "Enter maximum allowed pile size (>= 20): ";
+    cin >> maxPile;
+    if (maxPile < 20) {
+        cerr << "Invalid maximum pile size. Must be at least 20. Exiting." << endl;
+        return 1;
+    }
+
+    // Step 2: Ask for starting piles
+    initialPiles.resize(3);
+    cout << "Enter the starting values for the three piles (each between 20 and " << maxPile << "): ";
+    cin >> initialPiles[0] >> initialPiles[1] >> initialPiles[2];
+
+    // Step 3: Validate pile input
+    bool valid = true;
+    for (int pile : initialPiles) {
+        if (pile < 20 || pile > maxPile) {
+            valid = false;
+            break;
+        }
+    }
+
+    if (!valid) {
+        cerr << "Invalid input. Each pile must be between 20 and " << maxPile << ". Exiting." << endl;
+        return 1;
+    }
+
+    // Step 4: Simulation loop
+    while (true) {
+        visitedStates.clear();
+        simulateGame(initialPiles, 1, true);
+        gameIdCounter++;
+    }
 
     closeDatabase(db);
     return 0;
