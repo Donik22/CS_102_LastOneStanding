@@ -1,9 +1,13 @@
-#ifndef GAMEALGO_H
-#define GAMEALGO_H
+#include <iostream>
+#include <vector>
+#include <string>
 
-#include <tuple>
+using namespace std;
 
-std::tuple<int, int, int> gameAlgo(int a, int b, int c);
-int sum(int a, int b, int c);
-
-#endif
+// Existing function declarations
+vector<int> getInput();
+bool isValidInput(const vector<int>& numbers);
+int sum(const vector<int>& numbers);
+vector<int> gameAlgo(vector<int> numbers);
+void humanSubtractMove(vector<int>& numbers);
+void humanAddMove(vector<int>& numbers);
